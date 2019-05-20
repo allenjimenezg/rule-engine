@@ -7,18 +7,42 @@ const ANY_GROUPING          = 'any';
 
 class RuleEngine {
 
+    /**
+     * RUNS THE RULE ENGINE TO EVALUATE SOME SCHEMA AGAINST SOME RULES
+     *
+     * @param {Object} rules
+     * @param {Object} schema
+     *
+     * @return {Boolean}
+     * */
     static async run(rules, schema) {
         const tree = TreeBuilder.build(rules);
         const treeEvaluation = await RuleEngine.evaluateTree(tree, schema);
         return treeEvaluation;
     }
 
+    /**
+     * EVALUATE THE SCHEMA AGAINST THE BUILDED TREE OF RULES
+     *
+     * @param {Tree} tree
+     * @param {Object} schema
+     *
+     * @return {Boolean}
+     * */
     static async evaluateTree(tree, schema) {
         const rootNode          = tree.root;
         const nodeEvaluation    = await RuleEngine.evaluateNode(rootNode, schema);
         return nodeEvaluation;
     }
 
+    /**
+     * EVALUATE A PARTICULAR NODE INSIDE THE TREE
+     *
+     * @param {Node} node
+     * @param {Object} schema
+     *
+     * @return {Boolean}
+     * */
     static async evaluateNode(node, schema) {
         if(node) {
             const childrens = node.childrens;
@@ -40,6 +64,14 @@ class RuleEngine {
         } return false;
     }
 
+    /**
+     * EVALUATE THE SCHEMA BASED ON SOME FINAL CONDITION
+     *
+     * @param {Object} condition
+     * @param {Object} schema
+     *
+     * @return {Boolean}
+     * */
     static evaluateCondition(condition, schema) {
         const fieldPath = condition.field.split('.');
         const operator  = condition.operator;
@@ -59,7 +91,21 @@ class RuleEngine {
         return Operator.apply(value, condition.value, operator);
     }
 
-
+    /**
+     * EVALUATE THE RULES TO FIND IF IT SATISFY THE RULES DEFINITION SCHEMA
+     *
+     * @param {Object} rules
+     *
+     * @return {Boolean}
+     * */
+    static async validate(rules) {
+        try{
+            const tree = TreeBuilder.build(rules);
+            return true;
+        } catch(err) {
+            return false;
+        }
+    }
 }
 
 module.exports = RuleEngine;
